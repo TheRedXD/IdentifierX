@@ -22,6 +22,9 @@ import java.util.List;
 
 public final class IdentifierX extends JavaPlugin implements Listener {
     boolean lockDown = false;
+    public String genPluginMsg(String msg) {
+        return ChatColor.translateAlternateColorCodes('&', "&8[&cIdentifierX&8] &6"+msg);
+    }
     @Override
     public void onEnable() {
         this.getConfig().options().copyDefaults();
@@ -30,7 +33,6 @@ public final class IdentifierX extends JavaPlugin implements Listener {
         pm.registerEvents(this, this);
         System.out.println("[IdentifierX] The plugin has loaded!");
     }
-
     @Override
     public void onDisable() {
         // Plugin shutdown logic
@@ -146,6 +148,9 @@ public final class IdentifierX extends JavaPlugin implements Listener {
                     } else {
                         sender.sendMessage("Enabled lockdown");
                         lockDown = true;
+                        for(Player player : Bukkit.getOnlinePlayers()) {
+                            player.kickPlayer(genPluginMsg("Lockdown just got enabled! You can log back in if you have a verified IP!"));
+                        }
                     }
                     break;
                 default:
