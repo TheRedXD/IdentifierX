@@ -118,6 +118,14 @@ public final class IdentifierX extends JavaPlugin implements Listener {
                             player.kickPlayer(ChatColor.translateAlternateColorCodes('&', "&8[&cIdentifierX&8]\n&6Your IP just got removed.\nIP: &9"+args[1]));
                         }
                     }
+                    getConfig().set("allowed_ips", allowedIPS);
+                    try {
+                        getConfig().save("config.yml");
+                        saveConfig();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    updateConfig();
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8[&cIdentifierX&8]&6 The IP (&c"+args[1]+"&6) was successfully removed!"));
                     break;
                 case "list":
