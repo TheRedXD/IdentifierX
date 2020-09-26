@@ -1,0 +1,10 @@
+name: IdentifierX
+version: ${project.version}
+main: io.github.theredxd.identifierx.IdentifierX
+api-version: 1.16
+authors: [QuazarDevelopment]
+description: This basically verifies your ip so that if a person comes onto your offline mode server with your name, they would need to have a verified ip.
+website: wow.ro.lt
+commands:
+  identifierx:
+    permission: identifierx.command
