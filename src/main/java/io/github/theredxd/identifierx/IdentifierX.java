@@ -21,7 +21,7 @@ import java.util.List;
 
 
 public final class IdentifierX extends JavaPlugin implements Listener {
-
+    boolean lockDown = false;
     @Override
     public void onEnable() {
         this.getConfig().options().copyDefaults();
@@ -43,9 +43,8 @@ public final class IdentifierX extends JavaPlugin implements Listener {
     @EventHandler
     public void onPreJoin(PlayerPreLoginEvent e) {
         System.out.println(e.getAddress().getHostAddress());
-        if(e.getAddress().getHostAddress().equals("127.0.0.1")) {
-            return;
-        } else {
+        if(e.getAddress().getHostAddress().equals("127.0.0.1")) return;
+        else {
             if(allowedIPS.contains(e.getAddress().getHostAddress())) return;
             for(Player player: Bukkit.getOnlinePlayers()) {
                 if(player.hasPermission("identifierx.seeip")) {
@@ -135,6 +134,19 @@ public final class IdentifierX extends JavaPlugin implements Listener {
                         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6"+(number+1)+" - " + ip));
                     }
                     break;
+                case "lockdown":
+                    if(!sender.hasPermission("identifierx.command.lockdown")) {
+                        sender.sendMessage("No perms!");
+                        return true;
+                    }
+                    if(lockDown) {
+                        sender.sendMessage("Disabled lockdown");
+                        lockDown = false;
+                    } else {
+                        sender.sendMessage("Enabled lockdown");
+                        lockDown = true;
+                    }
+                    break;
                 default:
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8[&cIdentifierX&8] &6"));
             }
@@ -150,6 +162,7 @@ public final class IdentifierX extends JavaPlugin implements Listener {
                 returnArgs.add("add");
                 returnArgs.add("remove");
                 returnArgs.add("list");
+                returnArgs.add("lockdown");
                 return returnArgs;
             } else if(args[0].equals("remove")) {
                 return allowedIPS;
