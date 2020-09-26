@@ -11,7 +11,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerPreLoginEvent;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -22,6 +25,7 @@ import java.util.List;
 
 public final class IdentifierX extends JavaPlugin implements Listener {
     boolean lockDown = false;
+    boolean adminOnly = false;
     public String genPluginMsg(String msg) {
         return ChatColor.translateAlternateColorCodes('&', "&8[&cIdentifierX&8] &6"+msg);
     }
@@ -39,11 +43,16 @@ public final class IdentifierX extends JavaPlugin implements Listener {
     }
 
     List<String> allowedIPS = this.getConfig().getStringList("allowed_ips");
+    List<String> blockedUsers = new ArrayList<String>();
     public void updateConfig() {
         allowedIPS = this.getConfig().getStringList("allowed_ips");
     }
     @EventHandler
     public void onPreJoin(PlayerPreLoginEvent e) {
+        if(adminOnly) {
+            blockedUsers.add(e.getName());
+            return;
+        }
         if(!lockDown) return;
         System.out.println(e.getAddress().getHostAddress());
         if(e.getAddress().getHostAddress().equals("127.0.0.1")) return;
@@ -153,6 +162,23 @@ public final class IdentifierX extends JavaPlugin implements Listener {
                         }
                     }
                     break;
+                case "adminonly":
+                    if(!sender.hasPermission("identifierx.adminonly.toggle")) {
+                        sender.sendMessage(genPluginMsg("No perms!"));
+                        if(lockDown) {
+                            sender.sendMessage("Disabled admin only mode");
+                            lockDown = false;
+                        } else {
+                            sender.sendMessage("Enabled admin only mode");
+                            lockDown = true;
+                            for(Player player : Bukkit.getOnlinePlayers()) {
+                                if(player.hasPermission("identifierx.adminonly.bypass")) return true;
+                                else player.kickPlayer(genPluginMsg("Admin only mode has been enabled!"));
+                            }
+                        }
+                        return true;
+                    }
+                    break;
                 default:
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8[&cIdentifierX&8] &6"));
             }
@@ -175,5 +201,67 @@ public final class IdentifierX extends JavaPlugin implements Listener {
             }
         }
         return new ArrayList<>();
+    }
+    @EventHandler
+    public void onPlayerCommandPreprocess(final PlayerCommandPreprocessEvent e) {
+        if(blockedUsers.contains(e.getPlayer().getName())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onChat(AsyncPlayerChatEvent e) {
+        if(blockedUsers.contains(e.getPlayer().getName())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onMove(PlayerMoveEvent e) {
+        if(blockedUsers.contains(e.getPlayer().getName())) {
+            if(e.getPlayer().hasPermission("identifierx.adminonly.bypass")) blockedUsers.remove(e.getPlayer().getName());
+            else e.getPlayer().kickPlayer(genPluginMsg("Admin mode is currently enabled."));
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onPlace(BlockPlaceEvent e) {
+        if(blockedUsers.contains(e.getPlayer().getName())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onBreak(BlockBreakEvent e) {
+        if(blockedUsers.contains(e.getPlayer().getName())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onAttack(EntityDamageByEntityEvent e) {
+        if(e.getDamager() instanceof Player) {
+            if(blockedUsers.contains(e.getEntity().getName())) {
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        if(e.getPlayer().hasPermission("identifierx.adminonly.bypass")) blockedUsers.remove(e.getPlayer().getName());
+        else {
+            e.getPlayer().kickPlayer(genPluginMsg("Admin mode is currently enabled."));
+            e.setJoinMessage(null);
+        }
+    }
+
+    @EventHandler
+    public void onLeave(PlayerQuitEvent e) {
+        if(adminOnly) {
+            if(e.getPlayer().hasPermission("identifierx.adminonly.bypass")) return;
+            else e.setQuitMessage(null);
+        }
     }
 }
