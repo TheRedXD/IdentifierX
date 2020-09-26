@@ -42,6 +42,7 @@ public final class IdentifierX extends JavaPlugin implements Listener {
     }
     @EventHandler
     public void onPreJoin(PlayerPreLoginEvent e) {
+        if(!lockDown) return;
         System.out.println(e.getAddress().getHostAddress());
         if(e.getAddress().getHostAddress().equals("127.0.0.1")) return;
         else {
