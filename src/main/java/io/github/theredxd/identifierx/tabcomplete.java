@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class tabcomplete  {
+    //file no longer used because i could not figure out how to make this "communicate" with main file
     /*
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
