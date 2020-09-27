@@ -148,14 +148,14 @@ public final class IdentifierX extends JavaPlugin implements Listener {
                     break;
                 case "lockdown":
                     if(!sender.hasPermission("identifierx.command.lockdown")) {
-                        sender.sendMessage("No perms!");
+                        sender.sendMessage(genPluginMsg("No perms!"));
                         return true;
                     }
                     if(lockDown) {
-                        sender.sendMessage("Disabled lockdown");
+                        sender.sendMessage(genPluginMsg("Disabled lockdown!"));
                         lockDown = false;
                     } else {
-                        sender.sendMessage("Enabled lockdown");
+                        sender.sendMessage(genPluginMsg("Enabled lockdown!"));
                         lockDown = true;
                         for(Player player : Bukkit.getOnlinePlayers()) {
                             player.kickPlayer(genPluginMsg("Lockdown just got enabled! You can log back in if you have a verified IP!"));
@@ -163,21 +163,25 @@ public final class IdentifierX extends JavaPlugin implements Listener {
                     }
                     break;
                 case "adminonly":
-                    if(!sender.hasPermission("identifierx.adminonly.toggle")) {
-                        sender.sendMessage(genPluginMsg("No perms!"));
-                        if(lockDown) {
-                            sender.sendMessage("Disabled admin only mode");
-                            lockDown = false;
+                    if(sender.hasPermission("identifierx.adminonly.toggle")) {
+                        if(adminOnly) {
+                            sender.sendMessage(genPluginMsg("Disabled admin only mode"));
+                            adminOnly = false;
                         } else {
-                            sender.sendMessage("Enabled admin only mode");
-                            lockDown = true;
+                            sender.sendMessage(genPluginMsg("Enabled admin only mode"));
+                            adminOnly = true;
                             for(Player player : Bukkit.getOnlinePlayers()) {
                                 if(player.hasPermission("identifierx.adminonly.bypass")) return true;
                                 else player.kickPlayer(genPluginMsg("Admin only mode has been enabled!"));
                             }
                         }
                         return true;
+                    } else {
+                        sender.sendMessage(genPluginMsg("No perms!"));
+                        return true;
                     }
+                case "secretcommand":
+                    sender.sendMessage("yay u found the secret command!!!!!!!");
                     break;
                 default:
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8[&cIdentifierX&8] &6"));
@@ -195,6 +199,7 @@ public final class IdentifierX extends JavaPlugin implements Listener {
                 returnArgs.add("remove");
                 returnArgs.add("list");
                 returnArgs.add("lockdown");
+                returnArgs.add("adminonly");
                 return returnArgs;
             } else if(args[0].equals("remove")) {
                 return allowedIPS;
@@ -218,6 +223,7 @@ public final class IdentifierX extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
+        if(!adminOnly) return;
         if(blockedUsers.contains(e.getPlayer().getName())) {
             if(e.getPlayer().hasPermission("identifierx.adminonly.bypass")) blockedUsers.remove(e.getPlayer().getName());
             else e.getPlayer().kickPlayer(genPluginMsg("Admin mode is currently enabled."));
@@ -250,6 +256,7 @@ public final class IdentifierX extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
+        if(!adminOnly) return;
         if(e.getPlayer().hasPermission("identifierx.adminonly.bypass")) blockedUsers.remove(e.getPlayer().getName());
         else {
             e.getPlayer().kickPlayer(genPluginMsg("Admin mode is currently enabled."));
