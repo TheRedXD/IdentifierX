@@ -21,6 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 public final class IdentifierX extends JavaPlugin implements Listener {
@@ -54,7 +55,6 @@ public final class IdentifierX extends JavaPlugin implements Listener {
             return;
         }
         if(!lockDown) return;
-        System.out.println(e.getAddress().getHostAddress());
         if(e.getAddress().getHostAddress().equals("127.0.0.1")) return;
         else {
             if(allowedIPS.contains(e.getAddress().getHostAddress())) return;
@@ -68,7 +68,7 @@ public final class IdentifierX extends JavaPlugin implements Listener {
                     text2.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/identifierx add "+e.getAddress().getHostAddress()));
                     text2.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.translateAlternateColorCodes('&',"&bClick here in order to add the IP to the allowed IP list"))));
                     text.addExtra(text2);
-                    player.spigot().sendMessage(text); //docs == documentation
+                    player.spigot().sendMessage(text);
                 }
             }
 
@@ -256,6 +256,18 @@ public final class IdentifierX extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
+        if(e.getPlayer().hasPermission("identifierx.require_verified_ip")) {
+            if(allowedIPS.contains(Objects.requireNonNull(e.getPlayer().getAddress()).getAddress().getHostAddress())) return;
+            TextComponent text = new TextComponent();
+            text.setText(ChatColor.translateAlternateColorCodes('&', "&8[&cIdentifierX&8] &6A player with the username &c"+e.getPlayer().getName()+"&6 has attempted to log in with the ip &c"+e.getPlayer().getAddress().getAddress().getHostAddress()+"&6. To whitelist a IP, please run &c/identifierx add <ip>&6, or "));
+            TextComponent text2 = new TextComponent();
+            text2.setText(ChatColor.translateAlternateColorCodes('&', "&n&9click here&6."));
+            text2.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/identifierx add "+e.getPlayer().getAddress().getAddress().getHostAddress()));
+            text2.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.translateAlternateColorCodes('&',"&bClick here in order to add the IP to the allowed IP list"))));
+            text.addExtra(text2);
+            e.getPlayer().spigot().sendMessage(text);
+            e.getPlayer().kickPlayer(genPluginMsg("Your IP is not verified!"));
+        }
         if(!adminOnly) return;
         if(e.getPlayer().hasPermission("identifierx.adminonly.bypass")) blockedUsers.remove(e.getPlayer().getName());
         else {
