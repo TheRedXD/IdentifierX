@@ -184,7 +184,7 @@ public final class IdentifierX extends JavaPlugin implements Listener {
                     sender.sendMessage("yay u found the secret command!!!!!!!");
                     break;
                 default:
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8[&cIdentifierX&8] &6"));
+                    sender.sendMessage(genPluginMsg("Unknown subcommand!"));
             }
 
         }
